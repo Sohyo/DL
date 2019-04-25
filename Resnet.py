@@ -44,6 +44,7 @@ class OurResNet:
     def train(self):
         total_loss = 0
         self.model.train()
+	self.model.cuda()
         for i, data in enumerate(self.train_loader):
             X, y = data[0].to(self.device), data[1].to(self.device)
             

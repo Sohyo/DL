@@ -49,7 +49,7 @@ loss_function = nn.CrossEntropyLoss() # your loss function, cross entropy works 
 optimizer = optim.Adadelta(model.parameters())
 
 start_ts = time.time()
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 losses = []
 batches = len(train_loader)
@@ -66,6 +66,7 @@ for epoch in range(epochs):
     # ----------------- TRAINING  -------------------- 
     # set model to training
     model.train()
+    model.cuda()
     
     for i, data in enumerate(train_loader):
         X, y = data[0].to(device), data[1].to(device)
