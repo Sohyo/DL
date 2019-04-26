@@ -1,20 +1,18 @@
-
-import torchvision.models as models
-from torchvision.models.resnet import ResNet, BasicBlock
-from torchvision.datasets import CIFAR100
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+import argparse
 import inspect
 import time
-from torch import nn, optim
+
 import torch
-from torchvision.transforms import Compose, ToTensor, Normalize, Resize
+import torchvision.models as models
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+from torch import nn, optim
 from torch.utils.data import DataLoader
-#from tqdm.autonotebook import tqdm
-import argparse
+
+from agrilplant_dataset import AgrilPlant
 
 
 class OurResNet:
-    def __init__(self, epochs, train_batch_size=100, val_batch_size=100, num_classes=100, pretrained=False):
+    def __init__(self, epochs, train_batch_size=100, val_batch_size=100, num_classes=10, pretrained=False):
         #load the model
         self.model = models.resnet18(pretrained=pretrained, num_classes=num_classes)
 
@@ -33,14 +31,8 @@ class OurResNet:
     
     @staticmethod
     def get_data_loaders(train_batch_size, val_batch_size):
-        # Transform function first Resize -> toTensor -> then normalize pixel values
-        data_transform = Compose([ Resize((224, 224)),ToTensor(), Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
-            
-        train_loader = DataLoader(CIFAR100(download=True, root="./data", transform=data_transform, train=True),
-                                batch_size=train_batch_size, shuffle=True)
-
-        val_loader = DataLoader(CIFAR100(download=True, root="./data", transform=data_transform, train=False),
-                                batch_size=val_batch_size, shuffle=False)
+        train_loader = DataLoader(AgrilPlant(train=True), batch_size=train_batch_size, shuffle=True)
+        val_loader = DataLoader(AgrilPlant(train=False), batch_size=val_batch_size, shuffle=False)
         return train_loader, val_loader
     
     def train(self):
@@ -62,8 +54,6 @@ class OurResNet:
             current_loss = loss.item()
             total_loss += current_loss
 
-            # updating progress bar
-            #progress.set_description("Loss: {:.4f}".format(total_loss/(i+1)))
             if not self.cuda_available:
                 print(total_loss/(i+1))
             
@@ -73,7 +63,6 @@ class OurResNet:
         return total_loss
         
     def validate(self):
-        
         val_losses = 0
         precision, recall, f1, accuracy = [], [], [], []
         self.model.eval()
