@@ -10,4 +10,4 @@ ml CUDA/9.1.85
 
 source ../venv/bin/activate
 
-python -u Resnet.py
+python -u Resnet.py --filename resnet_scratch_20 --epochs 20
