@@ -1,0 +1,90 @@
+/home/s2576597/venv/lib/python3.6/site-packages/sklearn/metrics/classification.py:1143: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/home/s2576597/venv/lib/python3.6/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+/home/s2576597/venv/lib/python3.6/site-packages/sklearn/metrics/classification.py:1143: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 in labels with no predicted samples.
+  'precision', 'predicted', average, warn_for)
+/home/s2576597/venv/lib/python3.6/site-packages/sklearn/metrics/classification.py:1145: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+Files already downloaded and verified
+Files already downloaded and verified
+batchs: 500, val_batches: 100
+Epoch 1/8, training loss: 3.8513889389038085, validation loss: 3.433708667755127
+	     precision: 0.1261
+	        recall: 0.1464
+	            F1: 0.1196
+	      accuracy: 0.1767
+Epoch 2/8, training loss: 3.034261550426483, validation loss: 2.891941785812378
+	     precision: 0.2065
+	        recall: 0.2233
+	            F1: 0.1937
+	      accuracy: 0.2672
+Epoch 3/8, training loss: 2.334655021190643, validation loss: 2.280222177505493
+	     precision: 0.3058
+	        recall: 0.3282
+	            F1: 0.2935
+	      accuracy: 0.3972
+Epoch 4/8, training loss: 1.8386543352603912, validation loss: 1.9811360836029053
+	     precision: 0.3727
+	        recall: 0.3874
+	            F1: 0.3559
+	      accuracy: 0.4635
+Epoch 5/8, training loss: 1.4932474443912507, validation loss: 1.8148179054260254
+	     precision: 0.4057
+	        recall: 0.4197
+	            F1: 0.3883
+	      accuracy: 0.5023
+Epoch 6/8, training loss: 1.1973209813833237, validation loss: 1.7056204080581665
+	     precision: 0.4608
+	        recall: 0.4665
+	            F1: 0.4398
+	      accuracy: 0.5459
+Epoch 7/8, training loss: 0.9269854295253753, validation loss: 1.8097143173217773
+	     precision: 0.4524
+	        recall: 0.4589
+	            F1: 0.4318
+	      accuracy: 0.5420
+Epoch 8/8, training loss: 0.664074472784996, validation loss: 1.8741416931152344
+	     precision: 0.4583
+	        recall: 0.4676
+	            F1: 0.4377
+	      accuracy: 0.5450
+Training time: 3895.6501288414s
+
+
+###############################################################################
+Peregrine Cluster
+Job 5312808 for user 's2576597'
+Finished at: Fri Apr 26 14:31:03 CEST 2019
+
+Job details:
+============
+
+Name                : resnet_try_jobscript
+User                : s2576597
+Partition           : gpu
+Nodes               : pg-gpu01
+Cores               : 12
+State               : COMPLETED
+Submit              : 2019-04-26T13:10:29
+Start               : 2019-04-26T13:25:36
+End                 : 2019-04-26T14:31:03
+Reserved walltime   :    05:00:00
+Used walltime       :    01:05:27
+Used CPU time       : 12-14:43:44 (efficiency: 2312.67%)
+% User (Computation): 85.87%
+% System (I/O)      : 14.13%
+Mem reserved        : 8G/node
+Max Mem used        : 1.68G (pg-gpu01)
+Max Disk Write      : 40.96K (pg-gpu01)
+Max Disk Read       : 1.82M (pg-gpu01)
+
+
+Acknowledgements:
+=================
+
+Please see this page if you want to acknowledge Peregrine in your publications:
+
+https://redmine.hpc.rug.nl/redmine/projects/peregrine/wiki/ScientificOutput
+
+################################################################################
