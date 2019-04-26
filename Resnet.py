@@ -10,6 +10,7 @@ import torch
 from torchvision.transforms import Compose, ToTensor, Normalize, Resize
 from torch.utils.data import DataLoader
 #from tqdm.autonotebook import tqdm
+import argparse
 
 
 class OurResNet:
@@ -127,6 +128,20 @@ class OurResNet:
         for name, scores in zip(("precision", "recall", "F1", "accuracy"), (p, r, f1, a)):
             print(f"\t{name.rjust(14, ' ')}: {sum(scores)/batch_size:.4f}")
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--epochs', type=int, default=10,
+                        help='The amount of epochs that the model will be trained.')
+    parser.add_argument('--filename', type=str, default='default',
+                        help='The nice file name to store nice output.')
+
+    args = parser.parse_args()
+    
+    return args.epochs, args.filename
+
+
 if __name__ == '__main__':
-    res = OurResNet(epochs=8)
+    epochs, filename = parse_arguments()
+    print("Our filename: {}".format(filename))
+    res = OurResNet(epochs=epochs)
     res.run()
