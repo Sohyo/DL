@@ -27,7 +27,8 @@ class OurResNet:
         self.optimizer = optim.Adadelta(self.model.parameters())
 
         # See if we use CPU or GPU
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.cuda_available = torch.cuda.is_available()
     
     @staticmethod
     def get_data_loaders(train_batch_size, val_batch_size):
@@ -44,10 +45,10 @@ class OurResNet:
     def train(self):
         total_loss = 0
         self.model.train()
-	self.model.cuda()
+        if self.cuda_available:
+            self.model.cuda()
         for i, data in enumerate(self.train_loader):
             X, y = data[0].to(self.device), data[1].to(self.device)
-            
             # training step for single batch
             self.model.zero_grad()
             outputs = self.model(X)
@@ -62,7 +63,8 @@ class OurResNet:
 
             # updating progress bar
             #progress.set_description("Loss: {:.4f}".format(total_loss/(i+1)))
-            print(total_loss/(i+1))
+            if not self.cuda_available:
+                print(total_loss/(i+1))
             
         # releasing unceseccary memory in GPU
         if torch.cuda.is_available():
@@ -126,5 +128,5 @@ class OurResNet:
             print(f"\t{name.rjust(14, ' ')}: {sum(scores)/batch_size:.4f}")
 
 if __name__ == '__main__':
-    res = OurResNet(epochs=5)
+    res = OurResNet(epochs=8)
     res.run()
