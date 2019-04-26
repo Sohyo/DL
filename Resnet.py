@@ -99,7 +99,7 @@ class OurResNet:
     def run(self):
         start_ts = time.time()
         
-        losses = []
+        metrics = []
         batches = len(self.train_loader)
         val_batches = len(self.val_loader)
         print("batchs: {}, val_batches: {}".format(batches, val_batches))
@@ -110,9 +110,10 @@ class OurResNet:
             
             print(f"Epoch {epoch+1}/{self.epochs}, training loss: {total_loss/batches}, validation loss: {val_losses/val_batches}")
             self.print_scores(precision, recall, f1, accuracy, val_batches)
-            losses.append(total_loss/batches) # for plotting learning curve
+            metrics.append((total_loss/batches, val_losses/val_batches, sum(precision)/val_batches, sum(recall)/val_batches, sum(f1)/val_batches, sum(accuracy)/val_batches)) # for plotting learning curve
         
         print(f"Training time: {time.time()-start_ts}s")
+        return metrics
     
     @staticmethod
     def calculate_metric(metric_fn, true_y, pred_y):
@@ -139,9 +140,15 @@ def parse_arguments():
     
     return args.epochs, args.filename
 
+def save_metrics(name, metrics):
+    with open(name, 'w') as f:
+        f.write('training_loss,validation_loss,precision,recall,f1,accuracy\n')
+        for training_loss, validation_loss, precision, recall, f1, accuracy in metrics:
+            f.write("{},{},{},{},{},{}\n".format(training_loss, validation_loss, precision, recall, f1, accuracy))
 
 if __name__ == '__main__':
     epochs, filename = parse_arguments()
-    print("Our filename: {}".format(filename))
     res = OurResNet(epochs=epochs)
-    res.run()
+    metrics = res.run()
+    save_metrics(filename, metrics)
+    
