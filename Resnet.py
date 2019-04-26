@@ -87,12 +87,12 @@ class OurResNet:
 
                 predicted_classes = torch.max(outputs, 1)[1] # get class from network's prediction
                 
-            # calculate P/R/F1/A metrics for batch
-            for acc, metric in zip((precision, recall, f1, accuracy), 
-                                (precision_score, recall_score, f1_score, accuracy_score)):
-                acc.append(
-                    self.calculate_metric(metric, y.cpu(), predicted_classes.cpu())
-                )
+                # calculate P/R/F1/A metrics for batch
+                for acc, metric in zip((precision, recall, f1, accuracy), 
+                                    (precision_score, recall_score, f1_score, accuracy_score)):
+                    acc.append(
+                        self.calculate_metric(metric, y.cpu(), predicted_classes.cpu())
+                    )
         return val_losses, precision, recall, f1, accuracy
     
     def run(self):
