@@ -11,15 +11,16 @@ from torch.utils.data import DataLoader
 from agrilplant_dataset import AgrilPlant
 
 
-class OurResNet:
+class baseNet:
+    #model_name
     def __init__(self, epochs, train_batch_size=100, val_batch_size=100, num_classes=10, pretrained=True, feature_extract=False):
         #load the model
-        self.model = models.resnet18(pretrained=pretrained)
+        self.model = models.densenet121(pretrained=pretrained)
         if feature_extract:
             for param in self.model.parameters():
                 param.requires_grad = False
         if pretrained:
-            self.model.fc = nn.Linear(512, num_classes)
+            self.model.classifier = nn.Linear(1024, num_classes)
         #params you need to specify:
         self.epochs = epochs
         # put your data loader here
@@ -141,7 +142,7 @@ def save_metrics(name, metrics):
 
 if __name__ == '__main__':
     epochs, filename = parse_arguments()
-    res = OurResNet(epochs=epochs, feature_extract=True)
+    res = OurDensenet(epochs=epochs, feature_extract=True)
     metrics = res.run()
     save_metrics(filename, metrics)
 
