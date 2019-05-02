@@ -1,28 +1,25 @@
-
-import torchvision.models as models
-from torchvision.models.resnet import ResNet, BasicBlock
-from torchvision.datasets import CIFAR100
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+import argparse
 import inspect
 import time
-from torch import nn, optim
+
 import torch
-from torchvision.transforms import Compose, ToTensor, Normalize, Resize
+import torchvision.models as models
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+from torch import nn, optim
 from torch.utils.data import DataLoader
-#from tqdm.autonotebook import tqdm
-import argparse
+
+from agrilplant_dataset import AgrilPlant
 
 
 class OurResNet:
-    def __init__(self, epochs, train_batch_size=100, val_batch_size=100, num_classes=1000, pretrained=True):
+    def __init__(self, epochs, train_batch_size=100, val_batch_size=100, num_classes=10, pretrained=True):
         #load the model
-        self.model = models.resnet18(pretrained=pretrained, num_classes=num_classes)
+        self.model = models.resnet18(pretrained=pretrained)
         if pretrained:
             self.model.fc = nn.Linear(512, num_classes)
             
         #params you need to specify:
         self.epochs = epochs
-
         # put your data loader here
         self.train_loader, self.val_loader = self.get_data_loaders(train_batch_size, val_batch_size)
         self.loss_function = nn.CrossEntropyLoss() # your loss function, cross entropy works well for multi-class problems
@@ -34,22 +31,14 @@ class OurResNet:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.cuda_available = torch.cuda.is_available()
 
-
     @staticmethod
     def get_data_loaders(train_batch_size, val_batch_size):
-        # Transform function first Resize -> toTensor -> then normalize pixel values
-        data_transform = Compose([ Resize((224, 224)),ToTensor(), Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
-            
-        train_loader = DataLoader(CIFAR100(download=True, root="./data", transform=data_transform, train=True),
-                                batch_size=train_batch_size, shuffle=True)
-
-        val_loader = DataLoader(CIFAR100(download=True, root="./data", transform=data_transform, train=False),
-                                batch_size=val_batch_size, shuffle=False)
+        train_loader = DataLoader(AgrilPlant(train=True), batch_size=train_batch_size, shuffle=True)
+        val_loader = DataLoader(AgrilPlant(train=False), batch_size=val_batch_size, shuffle=False)
         return train_loader, val_loader
     
     def train(self):
         total_loss = 0
-
         self.model.train()
         if self.cuda_available:
             self.model.cuda()
@@ -67,8 +56,6 @@ class OurResNet:
             current_loss = loss.item()
             total_loss += current_loss
 
-            # updating progress bar
-            #progress.set_description("Loss: {:.4f}".format(total_loss/(i+1)))
             if not self.cuda_available:
                 print(total_loss/(i+1))
             
@@ -78,7 +65,6 @@ class OurResNet:
         return total_loss
         
     def validate(self):
-        
         val_losses = 0
         precision, recall, f1, accuracy = [], [], [], []
         self.model.eval()
@@ -104,7 +90,7 @@ class OurResNet:
     def run(self):
         start_ts = time.time()
         
-        losses = []
+        metrics = []
         batches = len(self.train_loader)
         val_batches = len(self.val_loader)
         print("batchs: {}, val_batches: {}".format(batches, val_batches))
@@ -115,10 +101,11 @@ class OurResNet:
             
             print(f"Epoch {epoch+1}/{self.epochs}, training loss: {total_loss/batches}, validation loss: {val_losses/val_batches}")
             self.print_scores(precision, recall, f1, accuracy, val_batches)
-            losses.append(total_loss/batches) # for plotting learning curve
+            metrics.append((total_loss/batches, val_losses/val_batches, sum(precision)/val_batches, sum(recall)/val_batches, sum(f1)/val_batches, sum(accuracy)/val_batches)) # for plotting learning curve
         
         print(f"Training time: {time.time()-start_ts}s")
-    
+        return metrics
+
     @staticmethod
     def calculate_metric(metric_fn, true_y, pred_y):
         # multi class problems need to have averaging method
@@ -144,9 +131,15 @@ def parse_arguments():
     
     return args.epochs, args.filename
 
+def save_metrics(name, metrics):
+    with open(name, 'w') as f:
+        f.write('training_loss,validation_loss,precision,recall,f1,accuracy\n')
+        for training_loss, validation_loss, precision, recall, f1, accuracy in metrics:
+            f.write("{},{},{},{},{},{}\n".format(training_loss, validation_loss, precision, recall, f1, accuracy))
 
 if __name__ == '__main__':
     epochs, filename = parse_arguments()
-    print("Our filename: {}".format(filename))
     res = OurResNet(epochs=epochs)
-    res.run()
+    metrics = res.run()
+    save_metrics(filename, metrics)
+
