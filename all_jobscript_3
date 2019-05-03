@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#SBATCH --time=23:30:00
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:1
+#SBATCH --mem=8GB
+
+ml Python/3.6.4-foss-2018a
+ml CUDA/9.1.85
+
+source ../venv/bin/activate
+
+python -u main.py --filename res_ft_400_adadelta_3 --epochs 400 --optimizer 'Adadelta'
+
+python -u main.py --filename res_ft_400_adam_3 --epochs 400 --optimizer 'Adam'
+
+python -u main.py --filename res_fe_400_adadelta_3 --epochs 400 --optimizer 'Adadelta' --feature_extract
+
+python -u main.py --filename res_fe_400_adam_3 --epochs 400 --optimizer 'Adam' --feature_extract
+
+
+python -u main.py --filename dense_ft_400_adadelta_3 --epochs 400 --optimizer 'Adadelta'
+
+python -u main.py --filename dense_ft_400_adam_3 --epochs 400 --optimizer 'Adam'
+
+python -u main.py --filename dense_fe_400_adadelta_3 --epochs 400 --optimizer 'Adadelta' --feature_extract
+
+python -u main.py --filename dense_fe_400_adam_3 --epochs 400 --optimizer 'Adam' --feature_extract
+
