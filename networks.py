@@ -1,4 +1,3 @@
-import argparse
 import inspect
 import time
 
@@ -8,33 +7,39 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from agrilplant_dataset import AgrilPlant
+from datasets import AgrilPlant
 
 
-class OurResNet:
-    def __init__(self, epochs, train_batch_size=100, val_batch_size=100, num_classes=10, pretrained=False):
-        #load the model
-        self.model = models.resnet18(pretrained=pretrained, num_classes=num_classes)
-
+class BaseNet:
+    def __init__(self, epochs, train_batch_size=100, val_batch_size=100, optimizer='Adadelta'):
         #params you need to specify:
         self.epochs = epochs
         # put your data loader here
         self.train_loader, self.val_loader = self.get_data_loaders(train_batch_size, val_batch_size)
         self.loss_function = nn.CrossEntropyLoss() # your loss function, cross entropy works well for multi-class problems
 
-        # optimizer, I've used Adadelta, as it wokrs well without any magic numbers
-        self.optimizer = optim.Adadelta(self.model.parameters())
+        # optimizer: Adadelta or Adam
+        if optimizer == "Adadelta":
+            self.optimizer = optim.Adadelta(self.model.parameters())
+        elif optimizer == "Adam":
+            self.optimizer = optim.Adam(self.model.parameters())
+        else:
+            raise Exception('You misspelled the optimizer:(')
 
         # See if we use CPU or GPU
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.cuda_available = torch.cuda.is_available()
-    
+
     @staticmethod
     def get_data_loaders(train_batch_size, val_batch_size):
         train_loader = DataLoader(AgrilPlant(train=True), batch_size=train_batch_size, shuffle=True)
         val_loader = DataLoader(AgrilPlant(train=False), batch_size=val_batch_size, shuffle=False)
         return train_loader, val_loader
-    
+
+    def freeze_all_layers(self):
+        for param in self.model.parameters():
+            param.requires_grad = False
+
     def train(self):
         total_loss = 0
         self.model.train()
@@ -103,7 +108,7 @@ class OurResNet:
         
         print(f"Training time: {time.time()-start_ts}s")
         return metrics
-    
+
     @staticmethod
     def calculate_metric(metric_fn, true_y, pred_y):
         # multi class problems need to have averaging method
@@ -118,26 +123,33 @@ class OurResNet:
         for name, scores in zip(("precision", "recall", "F1", "accuracy"), (p, r, f1, a)):
             print(f"\t{name.rjust(14, ' ')}: {sum(scores)/batch_size:.4f}")
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('--epochs', type=int, default=10,
-                        help='The amount of epochs that the model will be trained.')
-    parser.add_argument('--filename', type=str, default='default',
-                        help='The nice file name to store nice output.')
+    @staticmethod
+    def save_metrics(name, metrics):
+        with open(name, 'w') as f:
+            f.write('training_loss,validation_loss,precision,recall,f1,accuracy\n')
+            for training_loss, validation_loss, precision, recall, f1, accuracy in metrics:
+                f.write("{},{},{},{},{},{}\n".format(training_loss, validation_loss, precision, recall, f1, accuracy))
 
-    args = parser.parse_args()
-    
-    return args.epochs, args.filename
 
-def save_metrics(name, metrics):
-    with open(name, 'w') as f:
-        f.write('training_loss,validation_loss,precision,recall,f1,accuracy\n')
-        for training_loss, validation_loss, precision, recall, f1, accuracy in metrics:
-            f.write("{},{},{},{},{},{}\n".format(training_loss, validation_loss, precision, recall, f1, accuracy))
+class OurResNet(BaseNet):
+    def __init__(self, num_classes=10, pretrained=True, feature_extract=False, **kwargs):
+        # load the model
+        self.model = models.resnet18(pretrained=pretrained)
+        if feature_extract:
+            self.freeze_all_layers()
+        if pretrained:
+            self.model.fc = nn.Linear(512, num_classes)
 
-if __name__ == '__main__':
-    epochs, filename = parse_arguments()
-    res = OurResNet(epochs=epochs)
-    metrics = res.run()
-    save_metrics(filename, metrics)
-    
+        super().__init__(**kwargs)
+
+
+class OurDenseNet(BaseNet):
+    def __init__(self, num_classes=10, pretrained=True, feature_extract=False, **kwargs):
+        # load the model
+        self.model = models.densenet121(pretrained=pretrained)
+        if feature_extract:
+            self.freeze_all_layers()
+        if pretrained:
+            self.model.classifier = nn.Linear(1024, num_classes)
+
+        super().__init__(**kwargs)

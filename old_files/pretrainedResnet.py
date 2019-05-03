@@ -8,7 +8,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from agrilplant_dataset import AgrilPlant
+from datasets import AgrilPlant
 
 
 class OurResNet:

@@ -8,18 +8,14 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from agrilplant_dataset import AgrilPlant
+from datasets import AgrilPlant
 
 
-class OurDensenet:
-    def __init__(self, epochs, train_batch_size=100, val_batch_size=100, num_classes=10, pretrained=True, feature_extract=False):
+class OurResNet:
+    def __init__(self, epochs, train_batch_size=100, val_batch_size=100, num_classes=10, pretrained=False):
         #load the model
-        self.model = models.densenet121(pretrained=pretrained)
-        if feature_extract:
-            for param in self.model.parameters():
-                param.requires_grad = False
-        if pretrained:
-            self.model.classifier = nn.Linear(1024, num_classes)
+        self.model = models.resnet18(pretrained=pretrained, num_classes=num_classes)
+
         #params you need to specify:
         self.epochs = epochs
         # put your data loader here
@@ -32,7 +28,7 @@ class OurDensenet:
         # See if we use CPU or GPU
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.cuda_available = torch.cuda.is_available()
-
+    
     @staticmethod
     def get_data_loaders(train_batch_size, val_batch_size):
         train_loader = DataLoader(AgrilPlant(train=True), batch_size=train_batch_size, shuffle=True)
@@ -107,7 +103,7 @@ class OurDensenet:
         
         print(f"Training time: {time.time()-start_ts}s")
         return metrics
-
+    
     @staticmethod
     def calculate_metric(metric_fn, true_y, pred_y):
         # multi class problems need to have averaging method
@@ -141,7 +137,7 @@ def save_metrics(name, metrics):
 
 if __name__ == '__main__':
     epochs, filename = parse_arguments()
-    res = OurDensenet(epochs=epochs, feature_extract=True)
+    res = OurResNet(epochs=epochs)
     metrics = res.run()
     save_metrics(filename, metrics)
-
+    

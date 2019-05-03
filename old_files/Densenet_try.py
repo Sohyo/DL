@@ -8,11 +8,10 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-from agrilplant_dataset import AgrilPlant
+from datasets import AgrilPlant
 
 
-class baseNet:
-    #model_name
+class OurDensenet:
     def __init__(self, epochs, train_batch_size=100, val_batch_size=100, num_classes=10, pretrained=True, feature_extract=False):
         #load the model
         self.model = models.densenet121(pretrained=pretrained)
