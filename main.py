@@ -21,7 +21,7 @@ def parse_arguments():
 
 if __name__ == '__main__':
     epochs, filename, feature_extract, optimizer, use_densenet = parse_arguments()
-    #print(epochs, filename, feature_extract, optimizer)
+
     if use_densenet:
         net = OurDenseNet(epochs=epochs, feature_extract=feature_extract, optimizer=optimizer)
     else:
