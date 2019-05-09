@@ -137,8 +137,7 @@ class OurResNet(BaseNet):
         self.model = models.resnet18(pretrained=pretrained)
         if feature_extract:
             self.freeze_all_layers()
-        if pretrained:
-            self.model.fc = nn.Linear(512, num_classes)
+        self.model.fc = nn.Linear(512, num_classes)
 
         super().__init__(**kwargs)
 
@@ -149,7 +148,7 @@ class OurDenseNet(BaseNet):
         self.model = models.densenet121(pretrained=pretrained)
         if feature_extract:
             self.freeze_all_layers()
-        if pretrained:
-            self.model.classifier = nn.Linear(1024, num_classes)
+        self.model.classifier = nn.Linear(1024, num_classes)
 
         super().__init__(**kwargs)
+1
