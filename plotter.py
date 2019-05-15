@@ -7,7 +7,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Averages and plots output fom our pytorch networks.')
     parser.add_argument('--amount_of_files', type=int, default=4,
                         help='The amount of runs we did.')
-    parser.add_argument('--filename', type=str, default='default',
+    parser.add_argument('--filename', type=str, default=[], nargs='+',
                         help='The base filename of the files we want to read in.')
     parser.add_argument('--everything', default=False, action='store_true')
 
@@ -20,7 +20,7 @@ def parse_arguments():
 def read_in_files_to_average(filename, amount_of_files):
     summed_data = None
     for file_number in range(amount_of_files):
-        with open("{}_{}".format(filename, file_number), 'r') as f:
+        with open("results/{}_{}".format(filename, file_number), 'r') as f:
             data = np.array(list(csv.reader(f))[1:]).astype(float)
             if summed_data is None:
                 summed_data = np.zeros(data.shape)
@@ -29,7 +29,7 @@ def read_in_files_to_average(filename, amount_of_files):
 
     summed_data = None
     for file_number in range(amount_of_files):
-        with open("{}_{}".format(filename, file_number), 'r') as f:
+        with open("results/{}_{}".format(filename, file_number), 'r') as f:
             data = np.array(list(csv.reader(f))[1:]).astype(float)
             data = np.square(data-averages)
             if summed_data is None:
@@ -39,18 +39,21 @@ def read_in_files_to_average(filename, amount_of_files):
     return averages, stds
 
 
-def plot_accuracy(averages):
-    plt.plot(averages[:,5])
+def plot_accuracy(averages, filename):
+    plt.plot(averages[:,5], label= filename)
     plt.ylabel('Accuracy')
     plt.xlabel('Epochs')
+
+    plt.legend(loc='bottom right')
     plt.show()
 
 
-def plot_losses(averages):
-    plt.plot(averages[:,0])
-    plt.plot(averages[:,1])
+def plot_losses(averages, filename):
+    plt.plot(averages[:,0], label='test_loss'+filename)
+    plt.plot(averages[:,1], label='validation_loss'+filename)
     plt.ylabel('Loss')
     plt.xlabel('Epochs')
+    plt.legend(loc='bottom right')
     plt.show()
 
 
@@ -77,11 +80,12 @@ def plot_everything():
             s += "%0.3f+/-%0.3f\t" % (average, std) #""{.3f}:{}\t".format(float(average), std)
         print(s)
 
-
-def print_everything():
-    filenames = ["results/{}_{}_400_{}".format(net, method, optimizer) for net in ['dense', 'res'] for method in ['fe', 'ft'] for optimizer in ['adam', 'adadelta']]
-    all_averages = [read_in_files_to_average(filename, 4)[0] for filename in filenames]
-    print(all_averages)
+def plot_selecting(filename, amount_of_files):
+    print(filename)
+    all_averages = [read_in_files_to_average(each_file, amount_of_files)[0] for each_file in filename]
+    #for each_file in filename
+    plot_multiple_accuracies(all_averages, filename)
+    #plot_losses(all_averages, filename)
 
 
 if __name__ == '__main__':
@@ -90,6 +94,8 @@ if __name__ == '__main__':
     if everything:
         plot_everything()
     else:
-        averages = read_in_files_to_average(filename, amount_of_files)[0]
-        plot_accuracy(averages)
-        plot_losses(averages)
+        # only get average, not stds
+        #averages = read_in_files_to_average(filename, amount_of_files)[0]
+        #plot_accuracy(averages, filename)
+        #plot_losses(averages, filename)
+        plot_selecting(filename, amount_of_files)
