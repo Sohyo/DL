@@ -40,10 +40,9 @@ def read_in_files_to_average(filename, amount_of_files):
 
 
 def plot_accuracy(averages, filename):
-    plt.plot(averages[:,5], label= filename)
+    plt.plot(averages[:,5], label=filename)
     plt.ylabel('Accuracy')
     plt.xlabel('Epochs')
-
     plt.legend(loc='bottom right')
     plt.show()
 
@@ -66,6 +65,15 @@ def plot_multiple_accuracies(list_of_averages, filenames):
     plt.show()
 
 
+def plot_multiple_loss(list_of_averages, filenames):
+    for averages in list_of_averages:
+        plt.plot(averages[:,0], label='test_loss' + filenames)
+        plt.plot(averages[:,1], label='validation_loss' + filenames)
+    plt.ylabel('Loss')
+    plt.xlabel('Epochs')
+    plt.legend(loc='bottom right')
+    plt.show()
+
 def plot_everything():
     filenames = ["results/{}_{}_400_{}".format(net, method, optimizer) for net in ['dense', 'res'] for method in ['fe', 'ft'] for optimizer in ['adam', 'adadelta']]
     all_averages = [read_in_files_to_average(filename, 4)[0] for filename in filenames]
@@ -83,9 +91,8 @@ def plot_everything():
 def plot_selecting(filename, amount_of_files):
     print(filename)
     all_averages = [read_in_files_to_average(each_file, amount_of_files)[0] for each_file in filename]
-    #for each_file in filename
     plot_multiple_accuracies(all_averages, filename)
-    #plot_losses(all_averages, filename)
+    plot_multiple_loss(all_averages, filename)
 
 
 if __name__ == '__main__':
