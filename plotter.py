@@ -3,7 +3,6 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 
-
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Averages and plots output fom our pytorch networks.')
     parser.add_argument('--amount_of_files', type=int, default=4,
@@ -102,6 +101,4 @@ if __name__ == '__main__':
     else:
         # only get average, not stds
         #averages = read_in_files_to_average(filename, amount_of_files)[0]
-        #plot_accuracy(averages, filename)
-        #plot_losses(averages, filename)
         plot_selecting(filename, amount_of_files)
