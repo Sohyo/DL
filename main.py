@@ -8,9 +8,11 @@ def parse_arguments():
     parser.add_argument('--epochs', type=int, default=10,
                         help='The amount of epochs that the model will be trained.')
     parser.add_argument('--filename', type=str, default='default',
-                        help='The nice file name to store nice output.')
-    parser.add_argument('--feature_extract', default=False, action='store_true')
-    parser.add_argument('--use_densenet', default=False, action='store_true')
+                        help='The nice file name to store output.')
+    parser.add_argument('--feature_extract', default=False, action='store_true',
+                        help='When this argument is supplied feature extraction instead of fine-tuing is used.')
+    parser.add_argument('--use_densenet', default=False, action='store_true',
+                        help='When this argument is supplied a densenet instead of a resnet is used.')
     parser.add_argument('--optimizer', type=str, default='Adadelta',
                         help='Please decide which optimizer you want to use: Adam or Adadelta')
 
